@@ -1,84 +1,89 @@
 from django.db import models
-
-# Create your models here.
+from django.core.exceptions import ValidationError
 
 class Transport(models.Model):
-	name=models.CharField(max_length=50)
-	capacity=models.IntegerField(default=0)
+    name = models.CharField(max_length=50)
 
-	def __str__(self):
-		return self.name 
+    def __str__(self):
+        return self.name
 
 
 class TransportType(models.Model):
-	name=models.CharField(max_length=50)
-	@staticmethod	
-	def get():
-		objects=TransportType.objects.all()
-		list_of_types=[]
-		
-		for object_get in objects :
-				selection=[]
-				selection.append(object_get.name)
-				selection.append(object_get.name)
-				list_of_types.append(tuple(selection))
-		return list_of_types
+    CATEGORY_CHOICES = [
+        ('cargo', 'Cargo'),
+        ('personnel', 'Personnel'),
+        ('military', 'Military'),
+    ]
 
-	def __str__(self):
-		return self.name
+    UNIT_CHOICES = [
+        ('kg', 'Kilograms'),
+        ('pers', 'Persons'),
+        ('units', 'Units'),
+    ]
 
-class Car_routes(models.Model):
-	from_T=models.CharField(max_length=50)
-	to_T=models.CharField(max_length=50)
-	name=models.CharField(max_length=100,null=True)
-	@staticmethod	
-	def get():
-		objects=Car_routes.objects.all()
-		list_of_types=[]
-		
-		for object_get in objects :
-				selection=[]
-				selection.append(object_get.name)
-				selection.append(object_get.name)
-				list_of_types.append(tuple(selection))
-		return list_of_types
-	def save(self, *args, **kwargs):
-		self.name=str(self.from_T)+"-"+str(self.to_T)
-		super().save(*args, **kwargs)  
-	def __str__(self):
-		return self.name
+    name = models.CharField(max_length=50)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    capacity = models.IntegerField(default=0)
+    capacity_unit = models.CharField(max_length=10, choices=UNIT_CHOICES, blank=True)
 
-class Naval_routes(models.Model):
-	from_T=models.CharField(max_length=50)
-	to_T=models.CharField(max_length=50)
-	name=models.CharField(max_length=100,null=True)
-	@staticmethod	
-	def get():
-		objects=Naval_routes.objects.all()
-		list_of_types=[]
-		
-		for object_get in objects :
-				selection=[]
-				selection.append(object_get.name)
-				selection.append(object_get.name)
-				list_of_types.append(tuple(selection))
-		return list_of_types
-	def save(self, *args, **kwargs):
-		self.name=str(self.from_T)+"-"+str(self.to_T)
-		super().save(*args, **kwargs)  
-		
-		
-	def __str__(self):
-		return self.name
+    @staticmethod
+    def get():
+        return [(obj.name, obj.name) for obj in TransportType.objects.all()]
+
+    def __str__(self):
+        return f"{self.name} ({self.category}) - {self.capacity} {self.capacity_unit}"
 
 
-class CarTransport(Transport):
-		CarTransportType=models.CharField(choices=TransportType.get(),max_length=100)
-		Parked=models.BooleanField()
-		Route=models.CharField(choices=Car_routes.get(),max_length=100)
+class Route(models.Model):
+    ROUTE_TYPE_CHOICES = [
+        ('land', 'Land'),
+        ('naval', 'Naval'),
+        ('air', 'Air'),
+    ]
+
+    route_type = models.CharField(max_length=10, choices=ROUTE_TYPE_CHOICES)
+    from_T = models.CharField(max_length=50)
+    to_T = models.CharField(max_length=50)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    length = models.IntegerField(default=0)
+
+    @staticmethod
+    def get():
+        return [(obj.name, obj.name) for obj in Route.objects.all()]
+
+    def save(self, *args, **kwargs):
+        self.name = f"{self.from_T}-{self.to_T}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_route_type_display()})"
+
+
+class LandTransport(Transport):
+    transport_type = models.ForeignKey(TransportType, on_delete=models.CASCADE,null=True, blank=True)
+    available = models.BooleanField()
+    route = models.ForeignKey(Route, on_delete=models.CASCADE,null=True, blank=True)
+
+    def clean(self):
+        if self.route and self.route.route_type != 'land':
+            raise ValidationError("Only land routes can be assigned to LandTransport.")
+
 
 class NavalTransport(Transport):
-		NavalTransportType=models.CharField(choices=TransportType.get(),max_length=100)	
-		Docked=models.BooleanField()
-		Route=models.CharField(choices=Naval_routes.get(),max_length=100)
-		
+    transport_type = models.ForeignKey(TransportType, on_delete=models.CASCADE,null=True, blank=True)
+    available = models.BooleanField()
+    route = models.ForeignKey(Route, on_delete=models.CASCADE,null=True, blank=True)
+
+    def clean(self):
+        if self.route and self.route.route_type != 'naval':
+            raise ValidationError("Only naval routes can be assigned to NavalTransport.")
+
+
+class AirTransport(Transport):
+    transport_type = models.ForeignKey(TransportType, on_delete=models.CASCADE,null=True, blank=True)
+    available = models.BooleanField()
+    route = models.ForeignKey(Route, on_delete=models.CASCADE,null=True, blank=True)
+
+    def clean(self):
+        if self.route and self.route.route_type != 'air':
+            raise ValidationError("Only air routes can be assigned to AirTransport.")

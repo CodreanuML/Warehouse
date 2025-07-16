@@ -1,27 +1,55 @@
 from django.contrib import admin
+from .models import (
+    Transport,
+    TransportType,
+    Route,
+    LandTransport,
+    NavalTransport,
+    AirTransport,
+)
 
-# Register your models here.
-from .models import CarTransport,NavalTransport,TransportType,Car_routes,Naval_routes
+# Înregistrare model de bază Transport (dacă vrei să îl vezi separat în admin)
+@admin.register(Transport)
+class TransportAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
+    search_fields = ("name",)
 
-
-class CarTransportAdmin(admin.ModelAdmin):
-    pass
-
-class NavalTransportAdmin(admin.ModelAdmin):
-    pass
-
+# Admin pentru TransportType
+@admin.register(TransportType)
 class TransportTypeAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("id", "name", "category", "capacity", "capacity_unit")
+    list_filter = ("category",)
+    search_fields = ("name",)
+    ordering = ("name",)
 
+# Admin pentru Route
+@admin.register(Route)
+class RouteAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "route_type", "from_T", "to_T", "length")
+    list_filter = ("route_type",)
+    search_fields = ("name", "from_T", "to_T")
+    ordering = ("name",)
 
-class Car_routesAdmin(admin.ModelAdmin):
-    pass
+# Admin pentru LandTransport
+@admin.register(LandTransport)
+class LandTransportAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "transport_type", "available", "route")
+    list_filter = ("available", "transport_type")
+    search_fields = ("name",)
+    ordering = ("name",)
 
-class Naval_routesAdmin(admin.ModelAdmin):
-    pass
+# Admin pentru NavalTransport
+@admin.register(NavalTransport)
+class NavalTransportAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "transport_type", "available", "route")
+    list_filter = ("available", "transport_type")
+    search_fields = ("name",)
+    ordering = ("name",)
 
-admin.site.register(CarTransport, CarTransportAdmin)
-admin.site.register(NavalTransport, NavalTransportAdmin)
-admin.site.register(TransportType, TransportTypeAdmin)
-admin.site.register(Car_routes, Car_routesAdmin)
-admin.site.register(Naval_routes, Naval_routesAdmin)
+# Admin pentru AirTransport
+@admin.register(AirTransport)
+class AirTransportAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "transport_type", "available", "route")
+    list_filter = ("available", "transport_type")
+    search_fields = ("name",)
+    ordering = ("name",)
