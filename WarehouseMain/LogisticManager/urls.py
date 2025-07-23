@@ -5,13 +5,28 @@ app_name = "LogisticManager"
 from . import views as LogisticViews
 
 urlpatterns = [ 
+				#main
+					
 				path('main/',LogisticViews.Main.as_view(),name='main'),
+
+				#transport_type
 
 				path('transport_type/create/',LogisticViews.Transport_Type_Create.as_view(),name='transport_type_create'),
 
 				path('transport_type/update/<int:pk>/',LogisticViews.Transport_Type_Update.as_view(),name='transport_type_update'),
 
 				path('transport_type/delete/<int:pk>/',LogisticViews.Transport_Type_Delete.as_view(),name='transport_type_delete'),
+
+				#routes
+
+				path('routes/create/',LogisticViews.Routes_Create.as_view(),name='routes_create'),
+
+				path('routes/update/<int:pk>/',LogisticViews.Routes_Update.as_view(),name='routes_update'),
+
+				path('routes/delete/<int:pk>/',LogisticViews.Routes_Delete.as_view(),name='routes_delete'),
+
+
+				#general
 
 				path('successful/',LogisticViews.Successful.as_view(),name='successful'),
 

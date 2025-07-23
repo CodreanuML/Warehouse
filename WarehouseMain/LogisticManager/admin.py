@@ -25,7 +25,7 @@ class TransportTypeAdmin(admin.ModelAdmin):
 # Admin pentru Route
 @admin.register(Route)
 class RouteAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "route_type", "from_T", "to_T", "length")
+    list_display = ("id", "name", "route_type", "from_T", "to_T", "length","unit")
     list_filter = ("route_type",)
     search_fields = ("name", "from_T", "to_T")
     ordering = ("name",)

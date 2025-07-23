@@ -46,6 +46,8 @@ class Route(models.Model):
     to_T = models.CharField(max_length=50)
     name = models.CharField(max_length=100, null=True, blank=True)
     length = models.IntegerField(default=0)
+    unit=models.CharField(max_length=10, default="Km", blank=True)
+
 
     @staticmethod
     def get():
@@ -53,6 +55,11 @@ class Route(models.Model):
 
     def save(self, *args, **kwargs):
         self.name = f"{self.from_T}-{self.to_T}"
+        if self.route_type=="land":
+            self.unit="Km"
+        else :
+            self.unit="NM"
+
         super().save(*args, **kwargs)
 
     def __str__(self):
