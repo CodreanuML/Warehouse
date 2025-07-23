@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Acțiuni</title>
+    <style>
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .create { background-color: #4CAF50; color: white; }
+        .update { background-color: #2196F3; color: white; }
+        .delete { background-color: #f44336; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>Acțiuni disponibile</h1>
+
+    <form action="#" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn create">Create</button>
+    </form>
+
+    <form action="#" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn update">Update</button>
+    </form>
+
+    <form action="#" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn delete">Delete</button>
+    </form>
+
+</body>
+</html>
