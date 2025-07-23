@@ -46,6 +46,7 @@ class Transport_Type_Delete(DeleteView):
     model = TransportType
     template_name = 'LogisticManager/transport_type_delete.html'	
     success_url = reverse_lazy('LogisticManager:successful')
+    
 
 #Routes Subpages
 class Routes_Create(FormView):
@@ -59,12 +60,17 @@ class Routes_Create(FormView):
         return super().form_valid(form)    
 
 
-class Routes_Update(View):
-    pass
+class Routes_Update(UpdateView):
+    model = Route   
+    fields = ['route_type', 'from_T','to_T','length']
+    template_name = 'LogisticManager/routes_update.html'
+    success_url = reverse_lazy('LogisticManager:successful')
 
 
 class Routes_Delete(DeleteView):
-    pass
+    model = Route
+    template_name = 'LogisticManager/routes_delete.html'   
+    success_url = reverse_lazy('LogisticManager:successful')
 
 
 
