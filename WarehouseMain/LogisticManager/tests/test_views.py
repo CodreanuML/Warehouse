@@ -24,6 +24,13 @@ class TransportTypeViewsTest(TestCase):
             capacity_unit="kg"
         )
 
+    # Testează accesarea paginea de listare a transport_type
+    def test_transport_type_list_all(self):
+        response = self.client.get(reverse('LogisticManager:transport_type_list_all'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'LogisticManager/transport_type_list.html')
+
+
     # Testează accesarea paginii de creare a unui tip de transport (GET pe /transport_type/create/)
     def test_transport_type_create_get(self):
         response = self.client.get(reverse('LogisticManager:transport_type_create'))
@@ -74,6 +81,13 @@ class RouteViewsTest(TestCase):
             to_T='City B',
             length=200
         )
+
+    # Testează accesarea paginea de listare a routelor
+    def test_routes_list_all(self):
+        response = self.client.get(reverse('LogisticManager:routes_list_all'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'LogisticManager/routes_list.html')
+
 
     # Testează accesarea paginii de creare rută (GET pe /routes/create/)
     def test_route_create_get(self):
