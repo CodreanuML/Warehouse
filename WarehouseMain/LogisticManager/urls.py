@@ -10,6 +10,8 @@ urlpatterns = [
 				path('main/',LogisticViews.Main.as_view(),name='main'),
 
 				#transport_type
+				
+				path('transport_type/',LogisticViews.Transport_Type_List_All.as_view(),name='transport_type_list_all'),
 
 				path('transport_type/create/',LogisticViews.Transport_Type_Create.as_view(),name='transport_type_create'),
 
@@ -18,6 +20,8 @@ urlpatterns = [
 				path('transport_type/delete/<int:pk>/',LogisticViews.Transport_Type_Delete.as_view(),name='transport_type_delete'),
 
 				#routes
+
+				path('routes/',LogisticViews.Routes_List_All.as_view(),name='routes_list_all'),
 
 				path('routes/create/',LogisticViews.Routes_Create.as_view(),name='routes_create'),
 

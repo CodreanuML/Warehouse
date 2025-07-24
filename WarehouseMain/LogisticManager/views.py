@@ -4,9 +4,10 @@
 from django.shortcuts import render,redirect,reverse
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import ListView,TemplateView
 from django.views.generic.edit import FormView,CreateView,DeleteView,UpdateView
 from django.http import HttpResponse
+from django.core.paginator import Paginator
 
 
 #app imports
@@ -26,6 +27,17 @@ class Main(View):
 
 
 #Transport Type Subpages 
+class Transport_Type_List_All(View):
+
+    def get(self, request):
+        transport_types = TransportType.objects.all()
+        paginator = Paginator(transport_types, 10)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        return render(request, "LogisticManager/transport_type_list.html", {
+            "page_obj": page_obj
+        })
+
 class Transport_Type_Create(CreateView):
     model = TransportType	
     fields = ['name', 'category','capacity','capacity_unit']
@@ -48,7 +60,17 @@ class Transport_Type_Delete(DeleteView):
     success_url = reverse_lazy('LogisticManager:successful')
     
 
+
 #Routes Subpages
+
+class Routes_List_All(ListView):
+    model = Route
+    template_name = "LogisticManager/routes_list.html"
+    paginate_by = 10  
+      
+    
+
+
 class Routes_Create(FormView):
     template_name = 'LogisticManager/routes_create.html'
     form_class = RouteForm
