@@ -44,6 +44,27 @@ class TransportModelTests(TestCase):
             length=800
         )
 
+
+    #Route Tests
+    
+    def test_land_route_unit_km(self):
+        #testeaza daca se salveaza corect unitatea pentru transport terestru
+        r=self.land_route
+        self.assertEqual(r.unit,"Km")
+
+    def test_naval_route_unit_nm(self):
+        #testaza daca se salveaza corect unitatea pentru transport naval
+        r=self.naval_route
+        self.assertEqual(r.unit,"NM")    
+
+    def test_air_route_unit_nm(self):
+        #testaza daca se salveaza corect unitatea pentru transport aerian
+        r=self.air_route
+        self.assertEqual(r.unit,"NM")    
+
+
+    #Transport Air/Land/Naval Tests    
+
     def test_transport_str(self):
         # Testează metoda __str__ pentru Transport
         t = Transport.objects.create(name='GenericTransport')
