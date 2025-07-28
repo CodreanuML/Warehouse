@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from LogisticManager.models import TransportType, Route
+from LogisticManager.models import TransportType, Route , LandTransport , AirTransport , NavalTransport
 
 
 class MainViewTest(TestCase):
@@ -76,7 +76,7 @@ class RouteViewsTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.route = Route.objects.create(
-            route_type='Highway',
+            route_type='land',
             from_T='City A',
             to_T='City B',
             length=200
@@ -128,6 +128,280 @@ class RouteViewsTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertFalse(Route.objects.filter(pk=self.route.pk).exists())
+
+
+class LandTransportViewsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.TransportType = TransportType.objects.create(
+            name="TIR",
+            category='cargo',
+            capacity=1000,
+            capacity_unit="kg"
+        )
+
+        self.TransportTypeUpdate = TransportType.objects.create(
+            name="Lorry",
+            category='cargo',
+            capacity=1000,
+            capacity_unit="kg"
+        )
+
+
+        self.Route = Route.objects.create(
+            route_type='land',
+            from_T='City A',
+            to_T='City B',
+            length=200
+        )
+
+        self.RouteUpdate = Route.objects.create(
+            route_type='land',
+            from_T='City B',
+            to_T='City C',
+            length=300
+        )
+
+
+        self.LandTransport = LandTransport.objects.create(
+            transport_type=self.TransportType,
+            available=0,
+            route=self.Route
+            
+        )
+
+    # Testează accesarea paginea de listare a land transport
+    def test_land_transport_list_all(self):
+        response = self.client.get(reverse('LogisticManager:land_transport_all'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'LogisticManager/land_transport_list.html')
+
+
+    # Testează accesarea paginii de creare land transport (GET pe /routes/create/)
+    def test_land_transport_create_get(self):
+        response = self.client.get(reverse('LogisticManager:land_transport_create'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'LogisticManager/land_transport_create.html')
+
+    # Testează trimiterea unui formular valid pentru creare land transport (POST pe /routes/create/)
+    def test_land_transport_create_post(self):
+        response = self.client.post(reverse('LogisticManager:land_transport_create'), {
+            'transport_type': self.TransportType.id,
+            'available': 1,
+            'route': self.Route.id ,
+            
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.assertTrue(LandTransport.objects.filter(transport_type=self.TransportType).exists())
+
+    # Testează actualizarea unui land transport existente (POST pe /routes/update/<pk>/)
+    def test_land_transport_update_post(self):
+        url = reverse('LogisticManager:land_transport_update', kwargs={'pk': self.LandTransport.pk})
+        response = self.client.post(url, {
+            'transport_type': self.TransportTypeUpdate.id,
+            'available': 1,
+            'route': self.RouteUpdate.id ,
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.LandTransport.refresh_from_db()
+        self.assertEqual(self.LandTransport.transport_type, self.TransportTypeUpdate)
+
+
+    # Testează ștergerea unui land transport existent (POST pe /routes/delete/<pk>/)
+    def test_land_transport_delete_post(self):
+        url = reverse('LogisticManager:land_transport_delete', kwargs={'pk': self.LandTransport.pk})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.assertFalse(LandTransport.objects.filter(pk=self.LandTransport.pk).exists())
+
+
+
+
+class AirTransportViewsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.TransportType = TransportType.objects.create(
+            name="DHL",
+            category='cargo',
+            capacity=10000,
+            capacity_unit="kg"
+        )
+
+        self.TransportTypeUpdate = TransportType.objects.create(
+            name="PrioryPost",
+            category='cargo',
+            capacity=20000,
+            capacity_unit="kg"
+        )
+
+
+        self.Route = Route.objects.create(
+            route_type='air',
+            from_T='City A',
+            to_T='City B',
+            length=200
+        )
+
+        self.RouteUpdate = Route.objects.create(
+            route_type='air',
+            from_T='City B',
+            to_T='City C',
+            length=300
+        )
+
+
+        self.AirTransport = AirTransport.objects.create(
+            transport_type=self.TransportType,
+            available=0,
+            route=self.Route
+            
+        )
+
+    # Testează accesarea paginea de listare a air transport
+    def test_air_transport_list_all(self):
+        response = self.client.get(reverse('LogisticManager:land_transport_all'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'LogisticManager/land_transport_list.html')
+
+
+    # Testează accesarea paginii de creare air transport (GET pe /routes/create/)
+    def test_air_transport_create_get(self):
+        response = self.client.get(reverse('LogisticManager:air_transport_create'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'LogisticManager/air_transport_create.html')
+
+    # Testează trimiterea unui formular valid pentru creare air transport (POST pe /routes/create/)
+    def test_air_transport_create_post(self):
+        response = self.client.post(reverse('LogisticManager:air_transport_create'), {
+            'transport_type': self.TransportType.id,
+            'available': 1,
+            'route': self.Route.id ,
+            
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.assertTrue(AirTransport.objects.filter(transport_type=self.TransportType).exists())
+
+    # Testează actualizarea unui air transport existent (POST pe /routes/update/<pk>/)
+    def test_air_transport_update_post(self):
+        url = reverse('LogisticManager:air_transport_update', kwargs={'pk': self.AirTransport.pk})
+        response = self.client.post(url, {
+            'transport_type': self.TransportTypeUpdate.id,
+            'available': 1,
+            'route': self.RouteUpdate.id ,
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.AirTransport.refresh_from_db()
+        self.assertEqual(self.AirTransport.transport_type, self.TransportTypeUpdate)
+
+
+    # Testează ștergerea unui air transport existent (POST pe /routes/delete/<pk>/)
+    def test_air_transport_delete_post(self):
+        url = reverse('LogisticManager:air_transport_delete', kwargs={'pk': self.AirTransport.pk})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.assertFalse(AirTransport.objects.filter(pk=self.AirTransport.pk).exists())
+
+
+
+
+class NavalTransportViewsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.TransportType = TransportType.objects.create(
+            name="EgeanNavy",
+            category='cargo',
+            capacity=10000,
+            capacity_unit="kg"
+        )
+
+        self.TransportTypeUpdate = TransportType.objects.create(
+            name="NorwayNavy",
+            category='cargo',
+            capacity=20000,
+            capacity_unit="kg"
+        )
+
+
+        self.Route = Route.objects.create(
+            route_type='naval',
+            from_T='City A',
+            to_T='City B',
+            length=200
+        )
+
+        self.RouteUpdate = Route.objects.create(
+            route_type='naval',
+            from_T='City B',
+            to_T='City C',
+            length=300
+        )
+
+
+        self.NavalTransport = NavalTransport.objects.create(
+            transport_type=self.TransportType,
+            available=0,
+            route=self.Route
+            
+        )
+
+    # Testează accesarea paginea de listare a naval transport
+    def test_naval_transport_list_all(self):
+        response = self.client.get(reverse('LogisticManager:naval_transport_all'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'LogisticManager/naval_transport_list.html')
+
+
+    # Testează accesarea paginii de creare naval transport (GET pe /routes/create/)
+    def test_naval_transport_create_get(self):
+        response = self.client.get(reverse('LogisticManager:naval_transport_create'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'LogisticManager/naval_transport_create.html')
+
+    # Testează trimiterea unui formular valid pentru creare naval transport (POST pe /routes/create/)
+    def test_naval_transport_create_post(self):
+        response = self.client.post(reverse('LogisticManager:naval_transport_create'), {
+            'transport_type': self.TransportType.id,
+            'available': 1,
+            'route': self.Route.id ,
+            
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.assertTrue(NavalTransport.objects.filter(transport_type=self.TransportType).exists())
+
+    # Testează actualizarea unui naval transport existent (POST pe /routes/update/<pk>/)
+    def test_naval_transport_update_post(self):
+        url = reverse('LogisticManager:naval_transport_update', kwargs={'pk': self.NavalTransport.pk})
+        response = self.client.post(url, {
+            'transport_type': self.TransportTypeUpdate.id,
+            'available': 1,
+            'route': self.RouteUpdate.id ,
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.NavalTransport.refresh_from_db()
+        self.assertEqual(self.NavalTransport.transport_type, self.TransportTypeUpdate)
+
+
+    # Testează ștergerea unui naval transport existent (POST pe /routes/delete/<pk>/)
+    def test_naval_transport_delete_post(self):
+        url = reverse('LogisticManager:naval_transport_delete', kwargs={'pk': self.NavalTransport.pk})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('LogisticManager:successful'))
+        self.assertFalse(NavalTransport.objects.filter(pk=self.NavalTransport.pk).exists())
+
+
+
 
 
 class SuccessFailPagesTest(TestCase):

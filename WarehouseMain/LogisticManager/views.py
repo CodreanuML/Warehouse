@@ -70,7 +70,6 @@ class Routes_List_All(ListView):
       
     
 
-
 class Routes_Create(FormView):
     template_name = 'LogisticManager/routes_create.html'
     form_class = RouteForm
@@ -94,6 +93,104 @@ class Routes_Delete(DeleteView):
     template_name = 'LogisticManager/routes_delete.html'   
     success_url = reverse_lazy('LogisticManager:successful')
 
+
+#LandTransport
+
+class LandTransport_List_All(ListView):
+    model = LandTransport
+    template_name = "LogisticManager/land_transport_list.html"
+    paginate_by = 10  
+      
+    
+
+class LandTransport_Create(FormView):
+    template_name = 'LogisticManager/land_transport_create.html'
+    form_class = LandTransportForm
+    success_url = reverse_lazy('LogisticManager:successful')
+
+    def form_valid(self, form):
+        LandTransport = form.save(commit=False)
+        LandTransport.save()
+        return super().form_valid(form)    
+
+
+class LandTransport_Update(UpdateView):
+    model = LandTransport   
+    fields = ['transport_type', 'available','route']
+    template_name = 'LogisticManager/land_transport_update.html'
+    success_url = reverse_lazy('LogisticManager:successful')
+
+
+class LandTransport_Delete(DeleteView):
+    model = LandTransport
+    template_name = 'LogisticManager/land_transport_delete.html'   
+    success_url = reverse_lazy('LogisticManager:successful')
+
+
+
+#NavalTransport
+
+class NavalTransport_List_All(ListView):
+    model = NavalTransport
+    template_name = "LogisticManager/naval_transport_list.html"
+    paginate_by = 10  
+      
+    
+
+class NavalTransport_Create(FormView):
+    template_name = 'LogisticManager/naval_transport_create.html'
+    form_class = NavalTransportForm
+    success_url = reverse_lazy('LogisticManager:successful')
+
+    def form_valid(self, form):
+        NavalTransport = form.save(commit=False)
+        NavalTransport.save()
+        return super().form_valid(form)    
+
+
+class NavalTransport_Update(UpdateView):
+    model = NavalTransport   
+    fields = ['transport_type', 'available','route']
+    template_name = 'LogisticManager/naval_transport_update.html'
+    success_url = reverse_lazy('LogisticManager:successful')
+
+
+class NavalTransport_Delete(DeleteView):
+    model = NavalTransport
+    template_name = 'LogisticManager/naval_transport_delete.html'   
+    success_url = reverse_lazy('LogisticManager:successful')
+
+#AirTransport
+
+class AirTransport_List_All(ListView):
+    model = AirTransport
+    template_name = "LogisticManager/air_transport_list.html"
+    paginate_by = 10  
+      
+    
+
+class AirTransport_Create(FormView):
+    template_name = 'LogisticManager/air_transport_create.html'
+    form_class = AirTransportForm
+    success_url = reverse_lazy('LogisticManager:successful')
+
+    def form_valid(self, form):
+        AirTransport = form.save(commit=False)
+        AirTransport.save()
+        return super().form_valid(form)    
+
+
+class AirTransport_Update(UpdateView):
+    model = AirTransport   
+    fields = ['transport_type', 'available','route']
+    template_name = 'LogisticManager/air_transport_update.html'
+    success_url = reverse_lazy('LogisticManager:successful')
+
+
+class AirTransport_Delete(DeleteView):
+    model = AirTransport
+    template_name = 'LogisticManager/air_transport_delete.html'   
+    success_url = reverse_lazy('LogisticManager:successful')
 
 
 #General Pages

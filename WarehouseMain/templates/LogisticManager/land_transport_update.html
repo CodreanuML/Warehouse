@@ -2,7 +2,7 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>Creare Transport Terestru</title>
+    <title>Actualizare Transport Terestru</title>
     <style>
         body {
             font-family: sans-serif;
@@ -23,7 +23,7 @@
             border-radius: 4px;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #007BFF;
             color: white;
             padding: 12px 20px;
             border: none;
@@ -31,19 +31,19 @@
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
 
 <div class="form-container">
-    <h1>Adaugă Tip Transport</h1>
+    <h1>Modifică Transport Terestru</h1>
 
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Salvează</button>
+        <button type="submit">Salvează modificările</button>
     </form>
 </div>
 

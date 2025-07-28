@@ -2,49 +2,49 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>Creare Transport Terestru</title>
+    <title>Ștergere Transport Aerian</title>
     <style>
         body {
             font-family: sans-serif;
             padding: 40px;
+            text-align: center;
         }
         .form-container {
             max-width: 500px;
             margin: auto;
         }
-        label {
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0 20px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
         button {
-            background-color: #4CAF50;
+            background-color: #d9534f;
             color: white;
             padding: 12px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            margin: 10px;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #c9302c;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #333;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
 <div class="form-container">
-    <h1>Adaugă Tip Transport</h1>
+    <h1>Confirmare Ștergere</h1>
+    <p>Ești sigur că vrei să ștergi acest transport aerian?</p>
 
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Salvează</button>
+        <button type="submit">Da, șterge</button>
     </form>
+
+    <a href="{% url 'LogisticManager:air_transport_all' %}">Renunță</a>
 </div>
 
 </body>
