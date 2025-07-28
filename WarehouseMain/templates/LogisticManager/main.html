@@ -1,40 +1,206 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Acțiuni</title>
+    <title>Lista Transporturi</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 8px 12px;
+            font-size: 1em;
+        }
+
         .btn {
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 16px;
+            padding: 8px 14px;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.95em;
             cursor: pointer;
         }
-        .create { background-color: #4CAF50; color: white; }
-        .update { background-color: #2196F3; color: white; }
-        .delete { background-color: #f44336; color: white; }
+
+        .btn-add-transport {
+            background-color: #28a745;
+        }
+
+        .btn-add-route {
+            background-color: #007bff;
+        }
+
+        .btn-dynamic {
+            background-color: #17a2b8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .pagination {
+            margin-top: 15px;
+        }
+
+        .pagination button {
+            margin-right: 10px;
+            padding: 5px 10px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .pagination span {
+            font-weight: bold;
+        }
     </style>
+
+    <script>
+        let currentPage = 1;
+
+        function fetchData(page = 1) {
+            const type = document.getElementById("transportType").value;
+            currentPage = page;
+
+            fetch(`/logistics/main/data/?transport_type=${type}&page=${page}`)  // ajustează după url-ul tău
+                .then(response => response.json())
+                .then(data => {
+                    updateTable(data.transports);
+                    updatePagination(data.current_page, data.num_pages, data.has_previous, data.has_next);
+                });
+        }
+
+        function updateTable(transports) {
+            const tableBody = document.getElementById("transportTableBody");
+            tableBody.innerHTML = "";
+
+            if (transports.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4">Nu există transporturi disponibile.</td></tr>`;
+                return;
+            }
+
+            transports.forEach(item => {
+                const row = `<tr>
+                    <td>${item.id}</td>
+                    <td>${item.type}</td>
+                    <td>${item.available ? "Da" : "Nu"}</td>
+                    <td>${item.route}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function updatePagination(current, total, hasPrev, hasNext) {
+            const paginationDiv = document.getElementById("paginationControls");
+            paginationDiv.innerHTML = "";
+
+            if (hasPrev) {
+                const prevBtn = document.createElement("button");
+                prevBtn.textContent = "« Pagina anterioară";
+                prevBtn.onclick = () => fetchData(current - 1);
+                paginationDiv.appendChild(prevBtn);
+            }
+
+            const pageInfo = document.createElement("span");
+            pageInfo.textContent = `Pagina ${current} din ${total}`;
+            paginationDiv.appendChild(pageInfo);
+
+            if (hasNext) {
+                const nextBtn = document.createElement("button");
+                nextBtn.textContent = "Pagina următoare »";
+                nextBtn.onclick = () => fetchData(current + 1);
+                paginationDiv.appendChild(nextBtn);
+            }
+        }
+
+        function redirectToCreate() {
+            const type = document.getElementById("transportType").value;
+            let url = '';
+
+            if (type === 'land') {
+                url = "{% url 'LogisticManager:land_transport_create' %}";
+            } else if (type === 'naval') {
+                url = "{% url 'LogisticManager:naval_transport_create' %}";
+            } else if (type === 'air') {
+                url = "{% url 'LogisticManager:air_transport_create' %}";
+            } else {
+                alert('Selectați un tip valid de transport!');
+                return;
+            }
+
+            window.location.href = url;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchData(1);
+        });
+    </script>
 </head>
 <body>
+    <h2>Lista Transporturi</h2>
 
-    <h1>Acțiuni disponibile</h1>
+    <div class="controls">
+        <label for="transportType">Selectează tipul de transport:</label>
+        <select id="transportType" onchange="fetchData(1)">
+            <option value="land">Transport Terestru</option>
+            <option value="naval">Transport Naval</option>
+            <option value="air">Transport Aerian</option>
+        </select>
 
-    <form action="#" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn create">Create</button>
-    </form>
+        <a href="{% url 'LogisticManager:transport_type_create' %}" class="btn btn-add-transport">+ Înregistrează Tip Transport</a>
+        <a href="{% url 'LogisticManager:routes_create' %}" class="btn btn-add-route">+ Înregistrează Rută</a>
 
-    <form action="#" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn update">Update</button>
-    </form>
+        <button onclick="redirectToCreate()" class="btn btn-dynamic">
+            + Înregistrează Transport 
+        </button>
+    </div>
 
-    <form action="#" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn delete">Delete</button>
-    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tip Transport</th>
+                <th>Disponibil</th>
+                <th>Rută</th>
+            </tr>
+        </thead>
+        <tbody id="transportTableBody">
+            {% for t in initial_transports %}
+                <tr>
+                    <td>{{ t.id }}</td>
+                    <td>{{ t.transport_type.name }}</td>
+                    <td>{{ t.available|yesno:"Da,Nu" }}</td>
+                    <td>{{ t.route.name }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4">Nu există transporturi disponibile.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
+    <div class="pagination" id="paginationControls"></div>
 </body>
 </html>

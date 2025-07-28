@@ -8,6 +8,8 @@ urlpatterns = [
 				#main
 					
 				path('main/',LogisticViews.Main.as_view(),name='main'),
+				
+				path('main/data/', LogisticViews.MainDataView.as_view(), name='main-data'),
 
 				#transport_type
 				

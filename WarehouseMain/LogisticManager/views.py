@@ -8,6 +8,7 @@ from django.views.generic import ListView,TemplateView
 from django.views.generic.edit import FormView,CreateView,DeleteView,UpdateView
 from django.http import HttpResponse
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 
 
 #app imports
@@ -19,9 +20,54 @@ from .forms import TransportTypeForm,RouteForm,LandTransportForm,NavalTransportF
 
 
 #main page for logistic app
+
 class Main(View):
     def get(self, request):
-        return render(request,'LogisticManager/main.html',None)
+        transports_list = LandTransport.objects.select_related('route', 'transport_type').all()
+        paginator = Paginator(transports_list, 10)  # 10 pe pagină
+
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        return render(request, 'LogisticManager/main.html', {
+            'page_obj': page_obj,
+            'default_type': 'land'
+        })
+
+
+class MainDataView(View):
+    def get(self, request):
+        transport_type = request.GET.get('transport_type')
+        page_number = request.GET.get('page', 1)
+
+        if transport_type == 'land':
+            transports_list = LandTransport.objects.select_related('route', 'transport_type').all()
+        elif transport_type == 'naval':
+            transports_list = NavalTransport.objects.select_related('route', 'transport_type').all()
+        elif transport_type == 'air':
+            transports_list = AirTransport.objects.select_related('route', 'transport_type').all()
+        else:
+            return JsonResponse({'error': 'Invalid transport type'}, status=400)
+
+        paginator = Paginator(transports_list, 10)
+        page_obj = paginator.get_page(page_number)
+
+        data = [
+            {
+                'id': t.id,
+                'type': t.transport_type.name if t.transport_type else '',
+                'available': t.available,
+                'route': t.route.name if t.route else ''
+            } for t in page_obj
+        ]
+
+        return JsonResponse({
+            'transports': data,
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
+            'num_pages': paginator.num_pages,
+            'current_page': page_obj.number
+        })
 
 
 
