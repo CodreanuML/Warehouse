@@ -1,8 +1,9 @@
 from django.urls import include, path
+from . import views as LogisticViews
+
 
 app_name = "LogisticManager"
 
-from . import views as LogisticViews
 
 urlpatterns = [ 
 				#main
