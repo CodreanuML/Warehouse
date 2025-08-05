@@ -1,0 +1,6 @@
+<h2>Logare</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Logheaza-te!</button>
+</form>

@@ -9,6 +9,8 @@ from django.views.generic.edit import FormView,CreateView,DeleteView,UpdateView
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 
 #app imports
