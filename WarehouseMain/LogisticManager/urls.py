@@ -67,4 +67,7 @@ urlpatterns = [
 				path('successful/',LogisticViews.Successful.as_view(),name='successful'),
 
 				path('failled/',LogisticViews.Failled.as_view(),name='failled'),
+
+
+
 ]
