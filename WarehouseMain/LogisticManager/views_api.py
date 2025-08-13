@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import render,redirect,reverse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from django.http import HttpResponse
 
 
 
@@ -29,6 +30,22 @@ class TransportTypeViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 def RoutesViewSet(request):
-    queryset = Route.objects.all()
-    serializer = RoutesTypeSerializer(queryset, many=True)
-    return Response(serializer.data)
+    if request.method=="GET":
+        queryset = Route.objects.all()
+        serializer = RoutesTypeSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+def RouteDetailView(request,pk):
+    
+    try:
+        queryset=Route.objects.get(pk=pk)
+    except Route.DoesNotExist:
+        return HttpResponse(status=404)
+
+
+    if request.method=="GET":
+        serializer=RoutesTypeSerializer(queryset)
+        return Response(serializer.data)
+
