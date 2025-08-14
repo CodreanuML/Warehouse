@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from django.http import HttpResponse
 
 
-
+#dont use in production
 @method_decorator(csrf_exempt, name='dispatch')
 class TransportTypeViewSet(viewsets.ModelViewSet):
 
