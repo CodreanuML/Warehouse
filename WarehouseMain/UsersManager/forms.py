@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
 
@@ -30,4 +30,8 @@ class ProfileCreationForm(UserCreationForm):
 
 			)
 
+
+		group_name=self.cleaned_data['role']
+		group,created=Group.objects.get_or_create(name=group_name)	
+		user.groups.add(group)
 		return user

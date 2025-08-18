@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from UsersManager.permisions import GroupAccessMixin
 
 
 
@@ -27,6 +28,8 @@ from .forms import TransportTypeForm,RouteForm,LandTransportForm,NavalTransportF
 #main page for logistic app
 
 class Main(View):
+
+
     def get(self, request):
         transports_list = LandTransport.objects.select_related('route', 'transport_type').all()
         paginator = Paginator(transports_list, 10)  # 10 pe pagină
@@ -41,6 +44,9 @@ class Main(View):
 
 
 class MainDataView(View):
+
+
+
     def get(self, request):
         transport_type = request.GET.get('transport_type')
         page_number = request.GET.get('page', 1)
@@ -78,7 +84,10 @@ class MainDataView(View):
 
 
 #Transport Type Subpages 
-class Transport_Type_List_All(View):
+class Transport_Type_List_All(LoginRequiredMixin, GroupAccessMixin,View):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
 
     def get(self, request):
         transport_types = TransportType.objects.all()
@@ -89,7 +98,11 @@ class Transport_Type_List_All(View):
             "page_obj": page_obj
         })
 
-class Transport_Type_Create(CreateView):
+class Transport_Type_Create(LoginRequiredMixin, GroupAccessMixin,CreateView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
     model = TransportType	
     fields = ['name', 'category','capacity','capacity_unit']
     template_name = 'LogisticManager/transport_type_create.html'
@@ -99,13 +112,23 @@ class Transport_Type_Create(CreateView):
     	initial['name']="Introduceti numele Transportului"
     	return initial
 
-class Transport_Type_Update(UpdateView):
+class Transport_Type_Update(LoginRequiredMixin, GroupAccessMixin,UpdateView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = TransportType	
     fields = ['name', 'category','capacity','capacity_unit']
     template_name = 'LogisticManager/transport_type_update.html'
     success_url = reverse_lazy('LogisticManager:successful')
 
-class Transport_Type_Delete(DeleteView):
+class Transport_Type_Delete(LoginRequiredMixin, GroupAccessMixin,DeleteView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = TransportType
     template_name = 'LogisticManager/transport_type_delete.html'	
     success_url = reverse_lazy('LogisticManager:successful')
@@ -114,14 +137,24 @@ class Transport_Type_Delete(DeleteView):
 
 #Routes Subpages
 
-class Routes_List_All(ListView):
+class Routes_List_All(LoginRequiredMixin, GroupAccessMixin,ListView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = Route
     template_name = "LogisticManager/routes_list.html"
     paginate_by = 10  
       
     
 
-class Routes_Create(FormView):
+class Routes_Create(LoginRequiredMixin, GroupAccessMixin,FormView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     template_name = 'LogisticManager/routes_create.html'
     form_class = RouteForm
     success_url = reverse_lazy('LogisticManager:successful')
@@ -132,14 +165,25 @@ class Routes_Create(FormView):
         return super().form_valid(form)    
 
 
-class Routes_Update(UpdateView):
+class Routes_Update(LoginRequiredMixin, GroupAccessMixin,UpdateView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = Route   
     fields = ['route_type', 'from_T','to_T','length']
     template_name = 'LogisticManager/routes_update.html'
     success_url = reverse_lazy('LogisticManager:successful')
 
 
-class Routes_Delete(DeleteView):
+class Routes_Delete(LoginRequiredMixin, GroupAccessMixin,DeleteView):
+
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = Route
     template_name = 'LogisticManager/routes_delete.html'   
     success_url = reverse_lazy('LogisticManager:successful')
@@ -147,14 +191,25 @@ class Routes_Delete(DeleteView):
 
 #LandTransport
 
-class LandTransport_List_All(ListView):
+class LandTransport_List_All(LoginRequiredMixin, GroupAccessMixin,ListView):
+
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
     model = LandTransport
     template_name = "LogisticManager/land_transport_list.html"
     paginate_by = 10  
       
     
 
-class LandTransport_Create(FormView):
+class LandTransport_Create(LoginRequiredMixin, GroupAccessMixin,FormView):
+
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     template_name = 'LogisticManager/land_transport_create.html'
     form_class = LandTransportForm
     success_url = reverse_lazy('LogisticManager:successful')
@@ -165,14 +220,24 @@ class LandTransport_Create(FormView):
         return super().form_valid(form)    
 
 
-class LandTransport_Update(UpdateView):
+class LandTransport_Update(LoginRequiredMixin, GroupAccessMixin,UpdateView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = LandTransport   
     fields = ['transport_type', 'available','route']
     template_name = 'LogisticManager/land_transport_update.html'
     success_url = reverse_lazy('LogisticManager:successful')
 
 
-class LandTransport_Delete(DeleteView):
+class LandTransport_Delete(LoginRequiredMixin, GroupAccessMixin,DeleteView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = LandTransport
     template_name = 'LogisticManager/land_transport_delete.html'   
     success_url = reverse_lazy('LogisticManager:successful')
@@ -181,14 +246,24 @@ class LandTransport_Delete(DeleteView):
 
 #NavalTransport
 
-class NavalTransport_List_All(ListView):
+class NavalTransport_List_All(LoginRequiredMixin, GroupAccessMixin,ListView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = NavalTransport
     template_name = "LogisticManager/naval_transport_list.html"
     paginate_by = 10  
       
     
 
-class NavalTransport_Create(FormView):
+class NavalTransport_Create(LoginRequiredMixin, GroupAccessMixin,FormView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     template_name = 'LogisticManager/naval_transport_create.html'
     form_class = NavalTransportForm
     success_url = reverse_lazy('LogisticManager:successful')
@@ -199,28 +274,49 @@ class NavalTransport_Create(FormView):
         return super().form_valid(form)    
 
 
-class NavalTransport_Update(UpdateView):
+class NavalTransport_Update(LoginRequiredMixin, GroupAccessMixin,UpdateView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = NavalTransport   
     fields = ['transport_type', 'available','route']
     template_name = 'LogisticManager/naval_transport_update.html'
     success_url = reverse_lazy('LogisticManager:successful')
 
 
-class NavalTransport_Delete(DeleteView):
+class NavalTransport_Delete(LoginRequiredMixin, GroupAccessMixin,DeleteView):
+
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = NavalTransport
     template_name = 'LogisticManager/naval_transport_delete.html'   
     success_url = reverse_lazy('LogisticManager:successful')
 
 #AirTransport
 
-class AirTransport_List_All(ListView):
+class AirTransport_List_All(LoginRequiredMixin, GroupAccessMixin,ListView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = AirTransport
     template_name = "LogisticManager/air_transport_list.html"
     paginate_by = 10  
       
     
 
-class AirTransport_Create(FormView):
+class AirTransport_Create(LoginRequiredMixin, GroupAccessMixin,FormView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     template_name = 'LogisticManager/air_transport_create.html'
     form_class = AirTransportForm
     success_url = reverse_lazy('LogisticManager:successful')
@@ -231,14 +327,25 @@ class AirTransport_Create(FormView):
         return super().form_valid(form)    
 
 
-class AirTransport_Update(UpdateView):
+class AirTransport_Update(LoginRequiredMixin, GroupAccessMixin,UpdateView):
+
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+
     model = AirTransport   
     fields = ['transport_type', 'available','route']
     template_name = 'LogisticManager/air_transport_update.html'
     success_url = reverse_lazy('LogisticManager:successful')
 
 
-class AirTransport_Delete(DeleteView):
+class AirTransport_Delete(LoginRequiredMixin, GroupAccessMixin,DeleteView):
+
+    #allowed groups to access view
+    allowed_groups = ["logistic_user_lvl1","logistic_user_lvl2","logistic_manager","general_manager"]
+
+    
     model = AirTransport
     template_name = 'LogisticManager/air_transport_delete.html'   
     success_url = reverse_lazy('LogisticManager:successful')

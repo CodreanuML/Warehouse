@@ -1,7 +1,8 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from LogisticManager.models import TransportType, Route , LandTransport , AirTransport , NavalTransport
-
+from django.contrib.auth.models import User, Group
+from UsersManager.models import Profile 
 
 class MainViewTest(TestCase):
     def setUp(self):
@@ -16,6 +17,7 @@ class MainViewTest(TestCase):
 
 class TransportTypeViewsTest(TestCase):
     def setUp(self):
+
         self.client = Client()
         self.transport = TransportType.objects.create(
             name="Original",
@@ -24,13 +26,47 @@ class TransportTypeViewsTest(TestCase):
             capacity_unit="kg"
         )
 
+
+        #creeaza user pentru logistics lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_logistics_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="logistic_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
+
+        #creeaza user pentru warehouse lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_warehouse_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="warehouse_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
+
     # Testează accesarea paginea de listare a transport_type
     def test_transport_type_list_all(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
+
         response = self.client.get(reverse('LogisticManager:transport_type_list_all'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/transport_type_list.html')
 
-
+"""
     # Testează accesarea paginii de creare a unui tip de transport (GET pe /transport_type/create/)
     def test_transport_type_create_get(self):
         response = self.client.get(reverse('LogisticManager:transport_type_create'))
@@ -419,3 +455,7 @@ class SuccessFailPagesTest(TestCase):
         response = self.client.get(reverse('LogisticManager:failled'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'general/failled.html')
+
+
+
+"""

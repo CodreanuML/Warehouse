@@ -6,6 +6,9 @@ from django.contrib.auth.models import User
 from .forms import ProfileCreationForm
 from django.views.generic import ListView,TemplateView
 
+
+#views for handling user operation 
+
 class RegisterView(CreateView):
     model = User
     form_class = ProfileCreationForm
@@ -40,3 +43,5 @@ class MyPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 
 class MyPasswordResetCompleteView(auth_views.PasswordResetCompleteView):
     template_name = 'UsersManager/password_reset_complete.html'
+
+

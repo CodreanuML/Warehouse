@@ -82,9 +82,7 @@ class UsersManagerViewsAndURLsTest(TestCase):
 
     """
     def test_register_view_post_valid(self):
-        """
-        Testăm trimiterea formularului de înregistrare cu date valide
-        """
+
 
         url=reverse("UsersManager:register")
         print("POST to URL:",url)
