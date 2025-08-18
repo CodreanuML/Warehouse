@@ -63,18 +63,51 @@ class TransportTypeViewsTest(TestCase):
 
 
         response = self.client.get(reverse('LogisticManager:transport_type_list_all'))
+
         self.assertEqual(response.status_code, 200)
+
         self.assertTemplateUsed(response, 'LogisticManager/transport_type_list.html')
 
-"""
+    def test_transport_type_list_all_wrong_group_users(self):
+
+        #logheaza userul pentru testare
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")
+
+        response = self.client.get(reverse('LogisticManager:transport_type_list_all'))
+
+        self.assertEqual(response.status_code, 302)
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
+
     # Testează accesarea paginii de creare a unui tip de transport (GET pe /transport_type/create/)
     def test_transport_type_create_get(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:transport_type_create'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/transport_type_create.html')
 
+    def test_transport_type_create_get_wrong_group_users(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")
+
+        response = self.client.get(reverse('LogisticManager:transport_type_create'))
+
+        self.assertEqual(response.status_code, 302)
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
+
     # Testează trimiterea unui formular valid pentru creare transport (POST pe /transport_type/create/)
     def test_transport_type_create_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.post(reverse('LogisticManager:transport_type_create'), {
             'name': 'TIR',
             'category': 'cargo',
@@ -85,8 +118,29 @@ class TransportTypeViewsTest(TestCase):
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertTrue(TransportType.objects.filter(name='TIR').exists())
 
+    def test_transport_type_create_post_wrong_group_users(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")
+
+        response = self.client.post(reverse('LogisticManager:transport_type_create'), {
+            'name': 'TIR',
+            'category': 'cargo',
+            'capacity': 20000,
+            'capacity_unit': 'kg',
+        })
+
+        self.assertEqual(response.status_code, 302)
+
+        self.assertRedirects(response, reverse('UsersManager:login'))        
+
+
     # Testează actualizarea unui transport existent (POST pe /transport_type/update/<pk>/)
     def test_transport_type_update_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:transport_type_update', kwargs={'pk': self.transport.pk})
         response = self.client.post(url, {
             'name': 'Updated',
@@ -99,13 +153,48 @@ class TransportTypeViewsTest(TestCase):
         self.transport.refresh_from_db()
         self.assertEqual(self.transport.name, 'Updated')
 
+    def test_transport_type_update_post_wrong_group_users(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")
+
+        url = reverse('LogisticManager:transport_type_update', kwargs={'pk': self.transport.pk})
+        response = self.client.post(url, {
+            'name': 'Updated',
+            'category': 'cargo',
+            'capacity': 3000,
+            'capacity_unit': 'kg',
+        })
+
+        self.assertEqual(response.status_code, 302)
+
+        self.assertRedirects(response, reverse('UsersManager:login'))        
+
+
     # Testează ștergerea unui transport existent (POST pe /transport_type/delete/<pk>/)
     def test_transport_type_delete_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:transport_type_delete', kwargs={'pk': self.transport.pk})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertFalse(TransportType.objects.filter(pk=self.transport.pk).exists())
+
+    def test_transport_type_delete_post_wrong_group_users(self):
+        #logheaza userl pentru testare
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")
+
+        url = reverse('LogisticManager:transport_type_delete', kwargs={'pk': self.transport.pk})
+
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 302)
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
 
 
 class RouteViewsTest(TestCase):
@@ -118,21 +207,81 @@ class RouteViewsTest(TestCase):
             length=200
         )
 
+        #creeaza user pentru logistics lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_logistics_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="logistic_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
+
+        #creeaza user pentru warehouse lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_warehouse_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="warehouse_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
     # Testează accesarea paginea de listare a routelor
     def test_routes_list_all(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:routes_list_all'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/routes_list.html')
 
+    # Testează accesarea paginea de listare a routelor
+    def test_routes_list_all_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.get(reverse('LogisticManager:routes_list_all'))
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
 
     # Testează accesarea paginii de creare rută (GET pe /routes/create/)
     def test_route_create_get(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:routes_create'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/routes_create.html')
 
+    def test_route_create_get_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.get(reverse('LogisticManager:routes_create'))
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+        
+
     # Testează trimiterea unui formular valid pentru creare rută (POST pe /routes/create/)
     def test_route_create_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.post(reverse('LogisticManager:routes_create'), {
             'route_type': 'land',
             'from_T': 'Town X',
@@ -143,8 +292,29 @@ class RouteViewsTest(TestCase):
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertTrue(Route.objects.filter(from_T='Town X', to_T='Town Y').exists())
 
+    def test_route_create_post_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+
+        response = self.client.post(reverse('LogisticManager:routes_create'), {
+            'route_type': 'land',
+            'from_T': 'Town X',
+            'to_T': 'Town Y',
+            'length': 350
+        })
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
+
     # Testează actualizarea unei rute existente (POST pe /routes/update/<pk>/)
     def test_route_update_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:routes_update', kwargs={'pk': self.route.pk})
         response = self.client.post(url, {
             'route_type': 'naval',
@@ -157,13 +327,48 @@ class RouteViewsTest(TestCase):
         self.route.refresh_from_db()
         self.assertEqual(self.route.route_type, 'naval')
 
+    def test_route_update_post_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+
+        url = reverse('LogisticManager:routes_update', kwargs={'pk': self.route.pk})
+        response = self.client.post(url, {
+            'route_type': 'naval',
+            'from_T': self.route.from_T,
+            'to_T': self.route.to_T,
+            'length': 300
+        })
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
     # Testează ștergerea unei rute existente (POST pe /routes/delete/<pk>/)
     def test_route_delete_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:routes_delete', kwargs={'pk': self.route.pk})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertFalse(Route.objects.filter(pk=self.route.pk).exists())
+
+
+    def test_route_delete_post_wrong_group_users(self):
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+
+        url = reverse('LogisticManager:routes_delete', kwargs={'pk': self.route.pk})
+
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
 
 
 class LandTransportViewsTest(TestCase):
@@ -207,21 +412,80 @@ class LandTransportViewsTest(TestCase):
             
         )
 
+        #creeaza user pentru logistics lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_logistics_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="logistic_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
+
+        #creeaza user pentru warehouse lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_warehouse_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="warehouse_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
+
     # Testează accesarea paginea de listare a land transport
     def test_land_transport_list_all(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:land_transport_all'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/land_transport_list.html')
 
+    def test_land_transport_list_all_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.get(reverse('LogisticManager:land_transport_all'))
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
 
     # Testează accesarea paginii de creare land transport (GET pe /routes/create/)
     def test_land_transport_create_get(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:land_transport_create'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/land_transport_create.html')
 
+    def test_land_transport_create_get_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.get(reverse('LogisticManager:land_transport_create'))
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
     # Testează trimiterea unui formular valid pentru creare land transport (POST pe /routes/create/)
     def test_land_transport_create_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.post(reverse('LogisticManager:land_transport_create'), {
             'transport_type': self.TransportType.id,
             'available': 1,
@@ -232,8 +496,27 @@ class LandTransportViewsTest(TestCase):
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertTrue(LandTransport.objects.filter(transport_type=self.TransportType).exists())
 
+    def test_land_transport_create_post_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.post(reverse('LogisticManager:land_transport_create'), {
+            'transport_type': self.TransportType.id,
+            'available': 1,
+            'route': self.Route.id ,
+            
+        })
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
     # Testează actualizarea unui land transport existente (POST pe /routes/update/<pk>/)
     def test_land_transport_update_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:land_transport_update', kwargs={'pk': self.LandTransport.pk})
         response = self.client.post(url, {
             'transport_type': self.TransportTypeUpdate.id,
@@ -245,9 +528,28 @@ class LandTransportViewsTest(TestCase):
         self.LandTransport.refresh_from_db()
         self.assertEqual(self.LandTransport.transport_type, self.TransportTypeUpdate)
 
+    def test_land_transport_update_post_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        url = reverse('LogisticManager:land_transport_update', kwargs={'pk': self.LandTransport.pk})
+        response = self.client.post(url, {
+            'transport_type': self.TransportTypeUpdate.id,
+            'available': 1,
+            'route': self.RouteUpdate.id ,
+        })
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
 
     # Testează ștergerea unui land transport existent (POST pe /routes/delete/<pk>/)
     def test_land_transport_delete_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:land_transport_delete', kwargs={'pk': self.LandTransport.pk})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
@@ -255,6 +557,16 @@ class LandTransportViewsTest(TestCase):
         self.assertFalse(LandTransport.objects.filter(pk=self.LandTransport.pk).exists())
 
 
+    def test_land_transport_delete_post_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        url = reverse('LogisticManager:land_transport_delete', kwargs={'pk': self.LandTransport.pk})
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
 
 
 class AirTransportViewsTest(TestCase):
@@ -298,21 +610,80 @@ class AirTransportViewsTest(TestCase):
             
         )
 
+        #creeaza user pentru logistics lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_logistics_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="logistic_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
+
+        #creeaza user pentru warehouse lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_warehouse_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="warehouse_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
+
     # Testează accesarea paginea de listare a air transport
     def test_air_transport_list_all(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:land_transport_all'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/land_transport_list.html')
 
+    def test_air_transport_list_all_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.get(reverse('LogisticManager:land_transport_all'))
+
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
 
     # Testează accesarea paginii de creare air transport (GET pe /routes/create/)
     def test_air_transport_create_get(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:air_transport_create'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/air_transport_create.html')
 
+    def test_air_transport_create_get_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.get(reverse('LogisticManager:air_transport_create'))
+        
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
     # Testează trimiterea unui formular valid pentru creare air transport (POST pe /routes/create/)
     def test_air_transport_create_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.post(reverse('LogisticManager:air_transport_create'), {
             'transport_type': self.TransportType.id,
             'available': 1,
@@ -323,8 +694,30 @@ class AirTransportViewsTest(TestCase):
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertTrue(AirTransport.objects.filter(transport_type=self.TransportType).exists())
 
+
+    def test_air_transport_create_post_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.post(reverse('LogisticManager:air_transport_create'), {
+            'transport_type': self.TransportType.id,
+            'available': 1,
+            'route': self.Route.id ,
+            
+        })
+        
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
+
     # Testează actualizarea unui air transport existent (POST pe /routes/update/<pk>/)
     def test_air_transport_update_post(self):
+
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:air_transport_update', kwargs={'pk': self.AirTransport.pk})
         response = self.client.post(url, {
             'transport_type': self.TransportTypeUpdate.id,
@@ -336,14 +729,43 @@ class AirTransportViewsTest(TestCase):
         self.AirTransport.refresh_from_db()
         self.assertEqual(self.AirTransport.transport_type, self.TransportTypeUpdate)
 
+    def test_air_transport_update_post_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        url = reverse('LogisticManager:air_transport_update', kwargs={'pk': self.AirTransport.pk})
+        response = self.client.post(url, {
+            'transport_type': self.TransportTypeUpdate.id,
+            'available': 1,
+            'route': self.RouteUpdate.id ,
+        })
+        
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
 
     # Testează ștergerea unui air transport existent (POST pe /routes/delete/<pk>/)
     def test_air_transport_delete_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:air_transport_delete', kwargs={'pk': self.AirTransport.pk})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertFalse(AirTransport.objects.filter(pk=self.AirTransport.pk).exists())
+
+    def test_air_transport_delete_post_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        url = reverse('LogisticManager:air_transport_delete', kwargs={'pk': self.AirTransport.pk})
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
 
 
 
@@ -389,21 +811,82 @@ class NavalTransportViewsTest(TestCase):
             
         )
 
+
+        #creeaza user pentru logistics lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_logistics_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="logistic_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
+
+        #creeaza user pentru warehouse lvl 1 
+        self.user = User.objects.create_user(
+            username="testuser_warehouse_lvl_1",
+            password="secret123"
+        )    
+        self.profile = Profile.objects.create(
+            user=self.user,
+            role="warehouse_user_lvl1",
+            id_number=123
+        )
+        group, _ = Group.objects.get_or_create(name=self.profile.role)
+        self.user.groups.add(group)
+
     # Testează accesarea paginea de listare a naval transport
     def test_naval_transport_list_all(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:naval_transport_all'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/naval_transport_list.html')
 
+    def test_naval_transport_list_all_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.get(reverse('LogisticManager:naval_transport_all'))
+        
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
 
     # Testează accesarea paginii de creare naval transport (GET pe /routes/create/)
     def test_naval_transport_create_get(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.get(reverse('LogisticManager:naval_transport_create'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'LogisticManager/naval_transport_create.html')
 
+    def test_naval_transport_list_all_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.get(reverse('LogisticManager:naval_transport_create'))
+        
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
+
     # Testează trimiterea unui formular valid pentru creare naval transport (POST pe /routes/create/)
     def test_naval_transport_create_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         response = self.client.post(reverse('LogisticManager:naval_transport_create'), {
             'transport_type': self.TransportType.id,
             'available': 1,
@@ -414,8 +897,28 @@ class NavalTransportViewsTest(TestCase):
         self.assertRedirects(response, reverse('LogisticManager:successful'))
         self.assertTrue(NavalTransport.objects.filter(transport_type=self.TransportType).exists())
 
+    def test_naval_transport_list_all_wrong_group_users(self):
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        response = self.client.post(reverse('LogisticManager:naval_transport_create'), {
+            'transport_type': self.TransportType.id,
+            'available': 1,
+            'route': self.Route.id ,
+            
+        })
+        
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
     # Testează actualizarea unui naval transport existent (POST pe /routes/update/<pk>/)
     def test_naval_transport_update_post(self):
+
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:naval_transport_update', kwargs={'pk': self.NavalTransport.pk})
         response = self.client.post(url, {
             'transport_type': self.TransportTypeUpdate.id,
@@ -427,9 +930,28 @@ class NavalTransportViewsTest(TestCase):
         self.NavalTransport.refresh_from_db()
         self.assertEqual(self.NavalTransport.transport_type, self.TransportTypeUpdate)
 
+    def test_naval_transport_list_all_wrong_group_users(self):        
+
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        url = reverse('LogisticManager:naval_transport_update', kwargs={'pk': self.NavalTransport.pk})
+        response = self.client.post(url, {
+            'transport_type': self.TransportTypeUpdate.id,
+            'available': 1,
+            'route': self.RouteUpdate.id ,
+        })
+        
+        self.assertEqual(response.status_code, 302)             
+
+        self.assertRedirects(response, reverse('UsersManager:login'))
+
 
     # Testează ștergerea unui naval transport existent (POST pe /routes/delete/<pk>/)
     def test_naval_transport_delete_post(self):
+
+        #logheaza userl pentru testare
+        self.client.login(username="testuser_logistics_lvl_1", password="secret123")
+
         url = reverse('LogisticManager:naval_transport_delete', kwargs={'pk': self.NavalTransport.pk})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
@@ -437,7 +959,16 @@ class NavalTransportViewsTest(TestCase):
         self.assertFalse(NavalTransport.objects.filter(pk=self.NavalTransport.pk).exists())
 
 
+    def test_naval_transport_list_all_wrong_group_users(self):
+        
+        self.client.login(username="warehouse_logistics_lvl_1", password="secret123")   
+        
+        url = reverse('LogisticManager:naval_transport_delete', kwargs={'pk': self.NavalTransport.pk})
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, 302)             
 
+        self.assertRedirects(response, reverse('UsersManager:login'))
 
 
 class SuccessFailPagesTest(TestCase):
@@ -458,4 +989,3 @@ class SuccessFailPagesTest(TestCase):
 
 
 
-"""
